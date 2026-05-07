@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 
@@ -31,8 +33,6 @@ export default async function handler(req: any, res: any) {
 
 
     try {
-        const { to, subject, body } = req.body;
-
         const command = new SendEmailCommand({
             Destination: { ToAddresses: [to] },
             Message: {
