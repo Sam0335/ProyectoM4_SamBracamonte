@@ -1,0 +1,271 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+    --bg:           #0d0f14;
+    --surface:      #13161e;
+    --surface-2:    #1c2030;
+    --border:       rgba(255, 255, 255, 0.07);
+    --border-focus: rgba(99, 179, 237, 0.5);
+    --text:         #e8eaf0;
+    --text-muted:   #6b7280;
+    --accent:       #63b3ed;
+    --accent-hover: #90cdf4;
+    --accent-glow:  rgba(99, 179, 237, 0.15);
+    --error:        #fc8181;
+    --error-bg:     rgba(252, 129, 129, 0.08);
+    --radius:       12px;
+    --transition:   200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Page wrapper ───────────────────────────────────────────── */
+.page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg);
+    background-image:
+        radial-gradient(ellipse 60% 50% at 20% 10%, rgba(99, 179, 237, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(118, 100, 237, 0.05) 0%, transparent 55%);
+    font-family: 'DM Sans', sans-serif;
+    padding: 1.5rem;
+}
+
+/* ── Card ───────────────────────────────────────────────────── */
+.card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem 2.5rem 2rem;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 24px 48px rgba(0, 0, 0, 0.5);
+    animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Title ──────────────────────────────────────────────────── */
+.title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin: 0 0 0.25rem;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0 0 1.75rem;
+    font-weight: 300;
+}
+
+/* ── Divider ────────────────────────────────────────────────── */
+.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 1.75rem;
+}
+
+/* ── Form ───────────────────────────────────────────────────── */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+/* ── Input wrapper (para label flotante opcional) ───────────── */
+.inputGroup {
+    position: relative;
+}
+
+/* ── Inputs ─────────────────────────────────────────────────── */
+.input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    box-sizing: border-box;
+}
+
+.input::placeholder {
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.input:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    background: #161a26;
+}
+
+/* ── Error ──────────────────────────────────────────────────── */
+.error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--error);
+    background: var(--error-bg);
+    border: 1px solid rgba(252, 129, 129, 0.15);
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.825rem;
+    font-weight: 400;
+    margin: 0;
+    animation: shake 0.3s ease;
+}
+
+.error::before {
+    content: '⚠';
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%       { transform: translateX(-4px); }
+    75%       { transform: translateX(4px); }
+}
+
+/* ── Botón principal ────────────────────────────────────────── */
+.btnPrimary {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    margin-top: 0.25rem;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    color: #0d0f14;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.btnPrimary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0);
+    transition: background var(--transition);
+}
+
+.btnPrimary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    box-shadow: 0 4px 20px rgba(99, 179, 237, 0.35);
+    transform: translateY(-1px);
+}
+
+.btnPrimary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.btnPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Separador "o" ──────────────────────────────────────────── */
+.orSeparator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 0.25rem 0;
+}
+
+.orSeparator::before,
+.orSeparator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* ── Botón Google ───────────────────────────────────────────── */
+.btnGoogle {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.btnGoogle:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-1px);
+}
+
+.btnGoogle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* SVG de Google embebido como background en un span */
+.googleIcon {
+    width: 18px;
+    height: 18px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/%3E%3Cpath fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/%3E%3Cpath fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/%3E%3Cpath fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    flex-shrink: 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.footer {
+    margin: 1.25rem 0 0;
+    text-align: center;
+    font-size: 0.825rem;
+    color: var(--text-muted);
+}
+
+.footer a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition);
+}
+
+.footer a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}

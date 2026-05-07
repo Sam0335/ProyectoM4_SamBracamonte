@@ -2,6 +2,8 @@ import { useState, type JSX, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/Authenticator";
 import { getAuthErrorMessage, validateEmail, validatePassword } from "../features/AuthErrors";
+import styles from "./styles/Login.module.css";
+
 
 function LoginPage(): JSX.Element {
     const { signIn, signInGoogle } = useAuth();
@@ -59,46 +61,38 @@ function LoginPage(): JSX.Element {
         }
     }
 
-    return (
-        <div>
-            <h1>Iniciar sesión</h1>
-            <hr />
 
-            {/* onSubmit va en el <form>, no en el botón — así Enter también dispara el submit */}
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <br />
+return (
+    <div className={styles.page}>
+        <div className={styles.card}>
+            <h1 className={styles.title}>Iniciar sesión</h1>
+            <p className={styles.subtitle}>Bienvenido de vuelta</p>
+            <hr className={styles.divider} />
 
-                <input
-                    type="password"
-                    placeholder="Contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <br />
+            <form className={styles.form} onSubmit={handleSubmit}>
+                <input className={styles.input} type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input className={styles.input} type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-                {/* Solo se renderiza si hay un mensaje de error */}
-                {error && <p style={{ color: "red" }}>{error}</p>}
+                {error && <p className={styles.error}>{error}</p>}
 
-                {/* type="submit" dispara el onSubmit del form | disabled previene doble envío */}
-                <button type="submit" disabled={loading}>
+                <button className={styles.btnPrimary} type="submit" disabled={loading}>
                     {loading ? "Iniciando sesión..." : "Iniciar sesión"}
                 </button>
             </form>
 
-            {/* Fuera del form — Google no necesita los inputs */}
-            <button onClick={handleGoogleSignIn} disabled={loading}>
+            <div className={styles.orSeparator}>o</div>
+
+            <button className={styles.btnGoogle} onClick={handleGoogleSignIn} disabled={loading}>
+                <span className={styles.googleIcon} />
                 Iniciar sesión con Google
             </button>
 
-            <p>¿No tenés cuenta? <Link to="/register">Registrate</Link></p>
+            <p className={styles.footer}>
+                ¿No tenés cuenta? <Link to="/register">Registrate</Link>
+            </p>
         </div>
-    );
+    </div>
+);
 }
 
 export default LoginPage;
