@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../features/Authenticator";
 import { addTask, getTasksByUser, updateTask, deleteTask } from "../services/taskService";
 import type { Task } from "../types/task";
+import { EmailSummaryButton } from "../components/EmailSummaryButton";
 import styles from "./styles/Tasks.module.css";
 
 function TasksPage(): JSX.Element {
@@ -18,7 +19,7 @@ function TasksPage(): JSX.Element {
     const [error, setError] = useState<string | null>(null);
     
     // Verifica si el usuario está logueado y obtiene su ID
-    const { user } = useAuth();
+    const { user, logOut } = useAuth();
     const uid = user?.uid || null;
 
     const [showForm, setShowForm] = useState(false);
@@ -53,6 +54,15 @@ function TasksPage(): JSX.Element {
         return () => { cancelled = true; };
     }, [uid]);
 
+    // Cierra sesión
+    async function handleLogOut() {
+        try {
+            await logOut();
+        } catch {
+            setError("No se pudo cerrar la sesión.");
+        }
+    }
+    
     // Se ejecuta cuando se envía el formulario de nueva tarea
     async function handleAddTask(e: React.FormEvent) {
         e.preventDefault();
@@ -180,9 +190,9 @@ function TasksPage(): JSX.Element {
                         + Nueva tarea
                     </button>
                 )}
-            </header>
 
-            {!uid && <p className={styles.message}>Iniciá sesión para ver tus tareas.</p>}
+                <button className={styles.btnPrimary} onClick={handleLogOut}>Cerrar Sesión</button>
+            </header>
 
             {/*Formulario para agregar tareas*/}
             {showForm && (
@@ -290,12 +300,22 @@ function TasksPage(): JSX.Element {
                                     <button className={styles.btnDanger} onClick={() => handleDelete(t.id)}>
                                         Eliminar
                                     </button>
+
                                 </div>
                             </>
                         )}
                     </div>
                 ))}
             </section>
+
+            {/*Si el usuario está logueado y tiene email, se muestra el botón de enviar resumen*/}
+            {uid && user?.email && (
+                <EmailSummaryButton 
+                    tasks={tasks} 
+                    userEmail={user.email} 
+                    className={styles.btnPrimary}
+                />
+            )}
 
         </main>
     );
