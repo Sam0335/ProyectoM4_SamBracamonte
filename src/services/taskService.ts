@@ -2,7 +2,6 @@ import {
     collection,
     addDoc,
     getDoc,
-    getDocs,
     deleteDoc,
     query,
     where,
@@ -10,6 +9,8 @@ import {
     serverTimestamp,
     doc,
     updateDoc,
+    onSnapshot,
+    type Unsubscribe,
 } from "firebase/firestore";
 import { db, auth } from "./firebase.config";
 import type { Task, NewTaskInput } from "../types/task";
@@ -21,8 +22,11 @@ function checkAuth() {
     return userId;
 }
 
-// Obtiene las tareas del usuario actual
-export async function getTasksByUser(): Promise<Task[]> {
+// Suscribe las tareas del usuario actual en tiempo real
+export function subscribeToTasksByUser(
+    onTasksChange: (tasks: Task[]) => void,
+    onError?: (error: Error) => void
+): Unsubscribe {
     const userId = checkAuth();
 
     const taskQuery = query(
@@ -30,12 +34,21 @@ export async function getTasksByUser(): Promise<Task[]> {
         where("userId", "==", userId), 
         orderBy("createdAt", "desc")
     );
-    const snapshot = await getDocs(taskQuery);
 
-    return snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data() as Omit<Task, "id">,
-    }));
+    return onSnapshot(
+        taskQuery,
+        (snapshot) => {
+            const tasks = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data() as Omit<Task, "id">,
+            }));
+
+            onTasksChange(tasks);
+        },
+        (error) => {
+            onError?.(error);
+        }
+    );
 }
 
 // Crea una tarea

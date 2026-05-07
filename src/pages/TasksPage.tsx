@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../features/Authenticator";
-import { addTask, getTasksByUser, updateTask, deleteTask } from "../services/taskService";
+import { addTask, subscribeToTasksByUser, updateTask, deleteTask } from "../services/taskService";
 import type { Task } from "../types/task";
 import { EmailSummaryButton } from "../components/EmailSummaryButton";
 import styles from "./styles/Tasks.module.css";
@@ -26,23 +26,29 @@ function TasksPage(): JSX.Element {
         [uid, title, loading]
     );
 
-    // Carga inicial de tareas
+    // Suscripcion en tiempo real de tareas
     useEffect(() => {
-        if (!uid) { setTasks([]); return; }
-        let cancelled = false;
-        (async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const data = await getTasksByUser();
-                if (!cancelled) setTasks(data);
-            } catch {
-                if (!cancelled) setError("No se pudieron cargar las tareas.");
-            } finally {
-                if (!cancelled) setLoading(false);
+        if (!uid) {
+            setTasks([]);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        const unsubscribe = subscribeToTasksByUser(
+            (data) => {
+                setTasks(data);
+                setLoading(false);
+            },
+            () => {
+                setError("No se pudieron cargar las tareas.");
+                setLoading(false);
             }
-        })();
-        return () => { cancelled = true; };
+        );
+
+        return unsubscribe;
     }, [uid]);
 
     // Handlers
@@ -59,8 +65,7 @@ function TasksPage(): JSX.Element {
         try {
             setLoading(true);
             setError(null);
-            const created = await addTask({ title: cleanTitle, description: description.trim() });
-            setTasks((prev) => [created, ...prev]);
+            await addTask({ title: cleanTitle, description: description.trim() });
             setTitle("");
             setDescription("");
             setShowForm(false);
@@ -96,14 +101,9 @@ function TasksPage(): JSX.Element {
             setError(null);
             // LLama al servicio de actualización con los nuevos datos
             await updateTask(taskId, { title: editTitle.trim(), description: editDescription.trim() });
-            setTasks((prev) =>
-                prev.map((t) =>
-                    t.id === taskId
-                        ? { ...t, title: editTitle.trim(), description: editDescription.trim() }
-                        : t
-                )
-            );
             setEditingId(null);
+            setEditTitle("");
+            setEditDescription("");
         } catch {
             setError("No se pudo actualizar la tarea.");
         } finally {
@@ -117,9 +117,6 @@ function TasksPage(): JSX.Element {
         try {
             setError(null);
             await updateTask(task.id, { completed: newCompleted });
-            setTasks((prev) =>
-                prev.map((t) => t.id === task.id ? { ...t, completed: newCompleted } : t)
-            );
         } catch {
             setError("No se pudo actualizar la tarea.");
         }
@@ -131,7 +128,6 @@ function TasksPage(): JSX.Element {
         try {
             setError(null);
             await deleteTask(taskId);
-            setTasks((prev) => prev.filter((t) => t.id !== taskId));
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : "No se pudo eliminar la tarea.");
         }
@@ -145,7 +141,6 @@ function TasksPage(): JSX.Element {
         setError(null);
     }
 
-    // ── Render ───────────────────────────────────────────────────
     return (
         <div className={styles.page}>
             <main className={styles.container}>
@@ -220,7 +215,7 @@ function TasksPage(): JSX.Element {
                             className={`${styles.taskItem} ${t.completed ? styles.taskItemCompleted : ""}`}
                         >
                             {editingId === t.id ? (
-                                /* Modo edición — ahora es un <form> real */
+                                /* Modo edición */
                                 <form
                                     className={styles.editForm}
                                     onSubmit={(e) => handleUpdateTask(e, t.id)}

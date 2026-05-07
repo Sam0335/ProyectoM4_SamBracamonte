@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
 
-/* ── Variables (las mismas que Login.module.css) ────────────── */
+/* Variables */
 :root {
     --bg:           #0d0f14;
     --surface:      #13161e;
@@ -19,7 +19,7 @@
     --transition:   200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Page ───────────────────────────────────────────────────── */
+/* Page */
 .page {
     min-height: 100vh;
     background-color: var(--bg);
@@ -31,13 +31,13 @@
     padding: 2rem 1.5rem;
 }
 
-/* ── Container ──────────────────────────────────────────────── */
+/* Container */
 .container {
     max-width: 720px;
     margin: 0 auto;
 }
 
-/* ── Header ─────────────────────────────────────────────────── */
+/* Header */
 .header {
     display: flex;
     align-items: center;
@@ -63,7 +63,7 @@
     flex-shrink: 0;
 }
 
-/* ── Botones ─────────────────────────────────────────────────── */
+/* Botones */
 .btnPrimary {
     padding: 0.6rem 1.1rem;
     background: var(--accent);
@@ -151,7 +151,7 @@
     color: var(--error);
 }
 
-/* ── Formulario nueva tarea ──────────────────────────────────── */
+/* Formulario nueva tarea */
 .formCard {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -176,7 +176,7 @@
     justify-content: flex-end;
 }
 
-/* ── Inputs ──────────────────────────────────────────────────── */
+/* Inputs */
 .inputField {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -203,7 +203,7 @@
     box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-/* ── Mensajes de estado ──────────────────────────────────────── */
+/* Mensajes de estado */
 .statusMessage {
     padding: 0.75rem 1rem;
     border-radius: var(--radius);
@@ -230,14 +230,14 @@
     font-style: italic;
 }
 
-/* ── Lista de tareas ─────────────────────────────────────────── */
+/* Lista de tareas */
 .taskList {
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
 }
 
-/* ── Tarea individual ────────────────────────────────────────── */
+/* Tarea individual */
 .taskItem {
     display: flex;
     align-items: flex-start;
@@ -260,7 +260,7 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-/* Tarea completada: fondo levemente diferente */
+/* Tarea completada */
 .taskItemCompleted {
     opacity: 0.55;
 }
@@ -279,7 +279,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    min-width: 0; /* evita overflow en textos largos */
+    min-width: 0;
 }
 
 .taskTitle {
@@ -303,7 +303,7 @@
     margin: 0;
 }
 
-/* ── Acciones de la tarea ────────────────────────────────────── */
+/* Acciones de la tarea */
 .taskActions {
     display: flex;
     gap: 0.4rem;
@@ -311,7 +311,7 @@
     flex-shrink: 0;
 }
 
-/* ── Modo edición (reemplaza el contenido del taskItem) ──────── */
+/* Modo edición */
 .editForm {
     width: 100%;
     display: flex;
@@ -323,7 +323,7 @@
     min-height: 80px;
 }
 
-/* ── Email summary button (al final de la página) ───────────── */
+/* Email summary button */
 .summarySection {
     margin-top: 2rem;
     padding-top: 1.5rem;
