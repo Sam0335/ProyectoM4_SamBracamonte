@@ -2,7 +2,7 @@ import { useState, type JSX, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/Authenticator";
 import { getAuthErrorMessage, validateEmail, validatePassword } from "../features/AuthErrors";
-import styles from "./styles/Login.module.css";
+import styles from "./styles/Auth.module.css";
 
 
 function LoginPage(): JSX.Element {

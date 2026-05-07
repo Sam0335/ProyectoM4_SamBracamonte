@@ -1,34 +1,32 @@
 import type { JSX } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../features/Authenticator";
+import styles from "./styles/Auth.module.css";
 
 function LandingPage(): JSX.Element {
     const { user } = useAuth();
+
     return (
-        <div>
-            <h1>Bienvenido</h1>
-            <hr />
-            <p>Selecciona una opción para continuar</p>
+        <div className={styles.page}>
+            <div className={styles.card}>
+                <h1 className={styles.title}>Bienvenido</h1>
+                <p className={styles.subtitle}>Seleccioná una opción para continuar</p>
+                <hr className={styles.divider} />
 
-            <div>
-                <Link to="/login">
-                    <button>Iniciar sesión</button>
-                </Link>
-                <br />
+                {/* Los Link actúan como botones — primer hijo = primario, segundo = outline */}
+                <div className={styles.actions}>
+                    <Link to="/login">Iniciar sesión</Link>
+                    <Link to="/register">Registrarse</Link>
+                </div>
 
-                <Link to="/register">
-                    <button>Registrarse</button>
-                </Link>
-                <br />
-                <hr />
-
+                {/* Solo se muestra si el usuario ya está autenticado */}
                 {user && (
-                    <>
-                        <h2>Ya estas logeado...</h2>
-                        <Link to="/tasks">
-                            <button>Ir al panel de usuario</button>
-                        </Link>
-                    </>
+                    <div className={styles.loggedIn}>
+                        <h2 className={styles.loggedInTitle}>Ya tenés una sesión activa</h2>
+                        <div className={styles.actions}>
+                            <Link to="/tasks">Ir al panel de usuario</Link>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
