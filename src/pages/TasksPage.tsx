@@ -7,37 +7,29 @@ import { EmailSummaryButton } from "../components/EmailSummaryButton";
 import styles from "./styles/Tasks.module.css";
 
 function TasksPage(): JSX.Element {
-
-    // Estados
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [title, setTitle] = useState("");
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [editTitle, setEditTitle] = useState("");
-    const [editDescription, setEditDescription] = useState("");
-    const [description, setDescription] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    
-    // Verifica si el usuario está logueado y obtiene su ID
     const { user, logOut } = useAuth();
     const uid = user?.uid || null;
 
-    const [showForm, setShowForm] = useState(false);
+    // Estados
+    const [tasks,             setTasks          ] = useState<Task[]>([]);
+    const [title,             setTitle          ] = useState("");
+    const [description,       setDescription    ] = useState("");
+    const [editingId,         setEditingId      ] = useState<string | null>(null);
+    const [editTitle,         setEditTitle      ] = useState("");
+    const [editDescription,   setEditDescription] = useState("");
+    const [showForm,          setShowForm       ] = useState(false);
+    const [loading,           setLoading        ] = useState(false);
+    const [error,             setError          ] = useState<string | null>(null);
 
-    // Controla si el formulario de nueva tarea está visible o no
-    const canSubmit = useMemo(() => {
-        return Boolean(uid) && title.trim().length > 0 && !loading;
-    }, [uid, title, loading]);
+    const canSubmit = useMemo(
+        () => Boolean(uid) && title.trim().length > 0 && !loading,
+        [uid, title, loading]
+    );
 
-    // Hook que se ejecuta cuando el componente se monta o cuando el usuario cambia.
+    // Carga inicial de tareas
     useEffect(() => {
-        if (!uid) {
-            setTasks([]);
-            return;
-        }
-
+        if (!uid) { setTasks([]); return; }
         let cancelled = false;
-
         (async () => {
             try {
                 setLoading(true);
@@ -50,52 +42,31 @@ function TasksPage(): JSX.Element {
                 if (!cancelled) setLoading(false);
             }
         })();
-
         return () => { cancelled = true; };
     }, [uid]);
 
-    // Cierra sesión
+    // Handlers
     async function handleLogOut() {
-        try {
-            await logOut();
-        } catch {
-            setError("No se pudo cerrar la sesión.");
-        }
+        try { await logOut(); }
+        catch { setError("No se pudo cerrar la sesión."); }
     }
-    
-    // Se ejecuta cuando se envía el formulario de nueva tarea
+
     async function handleAddTask(e: React.FormEvent) {
         e.preventDefault();
-        if (!uid) {
-            setError("Necesitás iniciar sesión para crear tareas.");
-            return;
-        }
-
+        if (!uid) { setError("Necesitás iniciar sesión para crear tareas."); return; }
         const cleanTitle = title.trim();
         if (!cleanTitle) return;
-
         try {
             setLoading(true);
             setError(null);
-
-            const created = await addTask({
-                title: cleanTitle,
-                description: description.trim(),
-            });
-
+            const created = await addTask({ title: cleanTitle, description: description.trim() });
+            setTasks((prev) => [created, ...prev]);
             setTitle("");
             setDescription("");
             setShowForm(false);
-            setTasks((prev) => [created, ...prev]);
-
         } catch (e: unknown) {
             const message = e instanceof Error ? e.message : "Unknown error";
-            if (e instanceof Error) console.log(e.message);
-
-            if (
-                message.toLowerCase().includes("permission") ||
-                message.toLowerCase().includes("insufficient")
-            ) {
+            if (message.toLowerCase().includes("permission") || message.toLowerCase().includes("insufficient")) {
                 setError("Permisos insuficientes (permission-denied). Revisá Firestore Rules.");
                 return;
             }
@@ -109,29 +80,26 @@ function TasksPage(): JSX.Element {
         setEditingId(task.id);
         setEditTitle(task.title);
         setEditDescription(task.description || "");
-}
+    }
 
     function cancelEdit() {
         setEditingId(null);
         setEditTitle("");
         setEditDescription("");
     }
-    
-    async function handleUpdateTask(taskId: string) {
+
+    async function handleUpdateTask(e: React.FormEvent, taskId: string) {
+        e.preventDefault();
         if (!editTitle.trim()) return;
         try {
             setLoading(true);
             setError(null);
-            // Llama al servicio de actualización con los nuevos datos
-            await updateTask(taskId, {
-                title: editTitle.trim(),
-                description: editDescription.trim(),
-            });
-            // Actualización optimista del estado local
+            // LLama al servicio de actualización con los nuevos datos
+            await updateTask(taskId, { title: editTitle.trim(), description: editDescription.trim() });
             setTasks((prev) =>
                 prev.map((t) =>
-                    t.id === taskId 
-                        ? { ...t, title: editTitle.trim(), description: editDescription.trim() } 
+                    t.id === taskId
+                        ? { ...t, title: editTitle.trim(), description: editDescription.trim() }
                         : t
                 )
             );
@@ -150,9 +118,7 @@ function TasksPage(): JSX.Element {
             setError(null);
             await updateTask(task.id, { completed: newCompleted });
             setTasks((prev) =>
-                prev.map((t) =>
-                    t.id === task.id ? { ...t, completed: newCompleted } : t
-                )
+                prev.map((t) => t.id === task.id ? { ...t, completed: newCompleted } : t)
             );
         } catch {
             setError("No se pudo actualizar la tarea.");
@@ -179,145 +145,158 @@ function TasksPage(): JSX.Element {
         setError(null);
     }
 
+    // ── Render ───────────────────────────────────────────────────
     return (
-        <main className={styles.container}>
-            <header className={styles.header}>
-                <h1 className={styles.title}>Mis tareas</h1>
+        <div className={styles.page}>
+            <main className={styles.container}>
 
-                {/*Botón que activa el formulario de nueva tarea*/}
-                {!showForm && (
-                    <button className={styles.btnPrimary} onClick={() => setShowForm(true)}>
-                        + Nueva tarea
-                    </button>
+                {/* Cabecera */}
+                <header className={styles.header}>
+                    <h1 className={styles.title}>Mis tareas</h1>
+                    <div className={styles.headerActions}>
+                        {!showForm && (
+                            <button className={styles.btnPrimary} onClick={() => setShowForm(true)}>
+                                + Nueva tarea
+                            </button>
+                        )}
+                        <button className={styles.btnLogOut} onClick={handleLogOut}>
+                            Cerrar sesión
+                        </button>
+                    </div>
+                </header>
+
+                {/* Formulario nueva tarea */}
+                {showForm && (
+                    <form className={styles.formCard} onSubmit={handleAddTask}>
+                        <input
+                            className={styles.inputField}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Título de la tarea"
+                            aria-label="Título de la tarea"
+                            autoFocus
+                        />
+                        <textarea
+                            className={styles.inputField}
+                            value={description}
+                            rows={3}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Descripción (opcional)"
+                            aria-label="Descripción de la tarea"
+                        />
+                        <div className={styles.formActions}>
+                            <button className={styles.btnSecondary} type="button" onClick={handleCancelForm}>
+                                Cancelar
+                            </button>
+                            <button className={styles.btnPrimary} type="submit" disabled={!canSubmit}>
+                                {loading ? "Guardando..." : "Agregar"}
+                            </button>
+                        </div>
+                    </form>
                 )}
 
-                <button className={styles.btnPrimary} onClick={handleLogOut}>Cerrar Sesión</button>
-            </header>
+                {/* Mensajes de estado */}
+                {error && (
+                    <p className={`${styles.statusMessage} ${styles.statusError}`} role="alert">
+                        {error}
+                    </p>
+                )}
+                {loading && tasks.length === 0 && (
+                    <p className={`${styles.statusMessage} ${styles.statusMuted}`}>
+                        Cargando tareas...
+                    </p>
+                )}
+                {!loading && !error && tasks.length === 0 && uid && (
+                    <p className={`${styles.statusMessage} ${styles.statusMuted}`}>
+                        No tenés tareas todavía. ¡Creá una!
+                    </p>
+                )}
 
-            {/*Formulario para agregar tareas*/}
-            {showForm && (
-                <form className={styles.formCard} onSubmit={handleAddTask}>
-                    <input
-                        className={styles.inputField}
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Título"
-                        aria-label="Título de la tarea"
-                    />
-
-                    <textarea
-                        className={styles.inputField}
-                        value={description}
-                        rows={3}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Descripción (opcional)"
-                        aria-label="Descripción de la tarea"
-                    />
-
-                    <div className={styles.formActions}>
-                        <button className={styles.btnSecondary} type="button" onClick={handleCancelForm}>
-                            Cancelar
-                        </button>
-                        <button className={styles.btnPrimary} type="submit" disabled={!canSubmit}>
-                            {loading ? "Guardando..." : "Agregar"}
-                        </button>
-                    </div>
-                </form>
-            )}
-
-            {/*Mensajes de error*/}
-            {error && <p className={`${styles.message} ${styles.messageError}`} role="alert">{error}</p>}
-
-            {/*También mensajes pero de carga*/}
-            {loading && tasks.length === 0 && <p className={styles.message}>Cargando tareas...</p>}
-
-            {/*También mensajes pero cuando no hay tareas*/}
-            {!loading && !error && tasks.length === 0 && uid && (
-                <p className={`${styles.message} ${styles.messageEmpty}`}>No tenés tareas todavía.</p>
-            )}
-
-            {/*Lista de tareas*/}
-            <section className={styles.taskList}>
-                {tasks.map((t) => (
-                    <div className={styles.taskItem} key={t.id}>
-
-                        {/*Si la tarea se está editando mostramos el formulario de edicion*/}
-                        {editingId === t.id ? (
-                            <div className={styles.editModeContainer}>
-                                <input
-                                    className={styles.inputField}
-                                    value={editTitle}
-                                    onChange={(e) => setEditTitle(e.target.value)}
-                                    autoFocus
-                                />
-                                <textarea
-                                    className={styles.inputField}
-                                    value={editDescription}
-                                    onChange={(e) => setEditDescription(e.target.value)}
-                                />
-
-                                {/*Botones para guardar o cancelar la edicion*/}
-                                <div className={styles.formActions}>
-                                    <button className={styles.btnSecondary} onClick={cancelEdit}>
-                                        Cancelar
-                                    </button>
-
-                                    <button 
-                                        className={styles.btnPrimary} 
-                                        onClick={() => handleUpdateTask(t.id)}
-                                        disabled={loading || !editTitle.trim()}
-                                    >
-                                        {loading ? "..." : "Guardar"}
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                {/*Si no se está editando muestra la tarea normalmente*/}
-                                <input
-                                    className={styles.taskCheckbox}
-                                    type="checkbox"
-                                    checked={t.completed}
-                                    onChange={() => handleToggle(t)}
-                                    aria-label={`Marcar "${t.title}" como completada`}
-                                />
-
-                                <div className={styles.taskContent}>
-                                    <span className={`${styles.taskTitle} ${t.completed ? styles.taskTitleCompleted : ""}`}>
-                                        {t.title}
-                                    </span>
-                                    {!t.completed && t.description && (
-                                        <p className={styles.taskDescription}>{t.description}</p>)}
-                                </div>
-
-                                {/*Acciones de la tarea (editar o eliminar)*/}
-                                <div className={styles.taskActions}>
-                                    {!t.completed && (
-                                        <button className={styles.btnSecondary} onClick={() => startEditing(t)}>
-                                            Editar
+                {/* Lista de tareas */}
+                <section className={styles.taskList} aria-label="Lista de tareas">
+                    {tasks.map((t) => (
+                        <article
+                            key={t.id}
+                            className={`${styles.taskItem} ${t.completed ? styles.taskItemCompleted : ""}`}
+                        >
+                            {editingId === t.id ? (
+                                /* Modo edición — ahora es un <form> real */
+                                <form
+                                    className={styles.editForm}
+                                    onSubmit={(e) => handleUpdateTask(e, t.id)}
+                                >
+                                    <input
+                                        className={styles.inputField}
+                                        value={editTitle}
+                                        onChange={(e) => setEditTitle(e.target.value)}
+                                        autoFocus
+                                        aria-label="Editar título"
+                                    />
+                                    <textarea
+                                        className={styles.inputField}
+                                        value={editDescription}
+                                        onChange={(e) => setEditDescription(e.target.value)}
+                                        aria-label="Editar descripción"
+                                    />
+                                    <div className={styles.formActions}>
+                                        <button className={styles.btnSecondary} type="button" onClick={cancelEdit}>
+                                            Cancelar
                                         </button>
-                                    )}
-                                    <button className={styles.btnDanger} onClick={() => handleDelete(t.id)}>
-                                        Eliminar
-                                    </button>
+                                        <button
+                                            className={styles.btnPrimary}
+                                            type="submit"
+                                            disabled={loading || !editTitle.trim()}
+                                        >
+                                            {loading ? "..." : "Guardar"}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <>
+                                    <input
+                                        className={styles.taskCheckbox}
+                                        type="checkbox"
+                                        checked={t.completed}
+                                        onChange={() => handleToggle(t)}
+                                        aria-label={`Marcar "${t.title}" como completada`}
+                                    />
+                                    <div className={styles.taskContent}>
+                                        <span className={`${styles.taskTitle} ${t.completed ? styles.taskTitleCompleted : ""}`}>
+                                            {t.title}
+                                        </span>
+                                        {!t.completed && t.description && (
+                                            <p className={styles.taskDescription}>{t.description}</p>
+                                        )}
+                                    </div>
+                                    <div className={styles.taskActions}>
+                                        {!t.completed && (
+                                            <button className={styles.btnSecondary} onClick={() => startEditing(t)}>
+                                                Editar
+                                            </button>
+                                        )}
+                                        <button className={styles.btnDanger} onClick={() => handleDelete(t.id)}>
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </article>
+                    ))}
+                </section>
 
-                                </div>
-                            </>
-                        )}
+                {/* Botón de resumen por email */}
+                {uid && user?.email && (
+                    <div className={styles.summarySection}>
+                        <EmailSummaryButton
+                            tasks={tasks}
+                            userEmail={user.email}
+                            className={styles.btnSecondary}
+                        />
                     </div>
-                ))}
-            </section>
+                )}
 
-            {/*Si el usuario está logueado y tiene email, se muestra el botón de enviar resumen*/}
-            {uid && user?.email && (
-                <EmailSummaryButton 
-                    tasks={tasks} 
-                    userEmail={user.email} 
-                    className={styles.btnPrimary}
-                />
-            )}
-
-        </main>
+            </main>
+        </div>
     );
 }
 
